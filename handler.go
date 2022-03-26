@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 
 	"github.com/brensch/battleword"
@@ -20,7 +21,7 @@ func ServerStart() {
 	http.HandleFunc("/ping", HandlePing)
 
 	fmt.Printf("Starting server at port\n")
-	if err := http.ListenAndServe(":8056", nil); err != nil {
+	if err := http.ListenAndServe(":8083", nil); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -41,13 +42,13 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	word := ""
+	// word := GuessWord()
+	word := "world"
+
 	guess := battleword.Guess{
 		Guess: word,
 		Shout: "Im fragmented",
 	}
-
-	fmt.Fprintf(w, "We started")
 
 	err = json.NewEncoder(w).Encode(guess)
 	if err != nil {
@@ -55,11 +56,11 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	prevGuessesJSON, _ := json.Marshal(prevGuesses)
-	log.Printf("Making random guess for game %s, turn %d: %s\n", r.Header.Get(battleword.GuessIDHeader), len(prevGuesses.GuessResults), word)
-	log.Printf("Request ID %s. Body: %s\n", r.Header.Get(battleword.GuessIDHeader), prevGuessesJSON)
+	fmt.Printf("Making random guess for game %s, turn %d: %s\n", r.Header.Get(battleword.GuessIDHeader), len(prevGuesses.GuessResults), word)
+	fmt.Printf("Request ID %s. Body: %s\n", r.Header.Get(battleword.GuessIDHeader), prevGuessesJSON)
 }
 
-func HandleResult(w http.ResponseWriter, r *http.Request) {
+func HandlePing(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Handle Result Triggered")
 
@@ -69,19 +70,56 @@ func HandleResult(w http.ResponseWriter, r *http.Request) {
 	}
 
 	def := &battleword.PlayerDefinition{
-		Name:                "solvo",
-		Description:         "the magnificent",
+		Name:                "Lucid Thinker",
+		Description:         "Quick",
 		ConcurrentConnLimit: 10,
-		Colour:              "#596028",
+		Colour:              "#006179",
 	}
 
 	err := json.NewEncoder(w).Encode(def)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return
 	}
 }
 
-func HandlePing(w http.ResponseWriter, r *http.Request) {
+func HandleResult(w http.ResponseWriter, r *http.Request) {
+	var finalState battleword.PlayerMatchResults
+	err := json.NewDecoder(r.Body).Decode(&finalState)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	var us battleword.Player
+	found := false
+	for _, player := range finalState.Results.Players {
+		if player.ID == finalState.PlayerID {
+			us = player
+			found = true
+		}
+	}
+
+	if !found {
+		log.Println("We weren't in the results. strange")
+		return
+	}
+
+	gamesWon := 0
+	for _, game := range us.GamesPlayed {
+		if game.Correct {
+			gamesWon++
+		}
+	}
+
+	// finalStateJSON, _ := json.Marshal(finalState)
+
+	fmt.Printf("Match %s concluded, we got %d words right", finalState.Results.UUID, gamesWon)
+
+	// log.Printf("Match %s concluded, we got %d words right. Body: %s", finalState.Results.UUID, gamesWon, finalStateJSON)
+}
+
+func GuessWord() string {
+
+	return battleword.CommonWords[rand.Intn(len(battleword.CommonWords))]
 }
