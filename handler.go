@@ -21,6 +21,8 @@ func ServerStart() {
 	http.HandleFunc("/ping", HandlePing)
 
 	fmt.Printf("Starting server at port\n")
+
+	fmt.Println("--------------started-----------")
 	if err := http.ListenAndServe(":8083", nil); err != nil {
 		log.Fatal(err)
 	}
@@ -42,8 +44,8 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// word := GuessWord()
-	word := "world"
+	word := Solve(prevGuesses)
+	// word := "world"
 
 	guess := battleword.Guess{
 		Guess: word,
@@ -55,9 +57,9 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	prevGuessesJSON, _ := json.Marshal(prevGuesses)
-	fmt.Printf("Making random guess for game %s, turn %d: %s\n", r.Header.Get(battleword.GuessIDHeader), len(prevGuesses.GuessResults), word)
-	fmt.Printf("Request ID %s. Body: %s\n", r.Header.Get(battleword.GuessIDHeader), prevGuessesJSON)
+	// prevGuessesJSON, _ := json.Marshal(prevGuesses)
+	// fmt.Printf("Making random guess for game %s, turn %d: %s\n", r.Header.Get(battleword.GuessIDHeader), len(prevGuesses.GuessResults), word)
+	// fmt.Printf("Request ID %s. Body: %s\n", r.Header.Get(battleword.GuessIDHeader), prevGuessesJSON)
 }
 
 func HandlePing(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +116,11 @@ func HandleResult(w http.ResponseWriter, r *http.Request) {
 
 	// finalStateJSON, _ := json.Marshal(finalState)
 
-	fmt.Printf("Match %s concluded, we got %d words right", finalState.Results.UUID, gamesWon)
+	fmt.Printf("Match %s concluded, we got %d words right\n\n", finalState.Results.UUID, gamesWon)
+
+	for _, result := range finalState.Results.Games {
+		fmt.Println("finalword", result.Answer)
+	}
 
 	// log.Printf("Match %s concluded, we got %d words right. Body: %s", finalState.Results.UUID, gamesWon, finalStateJSON)
 }
