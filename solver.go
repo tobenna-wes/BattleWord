@@ -8,7 +8,11 @@ import (
 )
 
 var vowels = []string{"a", "e", "i", "o", "u"}
+
 var commonLetters = []string{"t", "n", "l", "c", "d", "s"}
+
+// var vowels = []string{}
+// var commonLetters = []string{}
 var allLetters = "abcdefghijklmnopqrstuvqrstuvwxyz"
 
 type letterStrong struct {
@@ -26,57 +30,6 @@ type letterStringList struct {
 	List  []letterStrong `json:"list,omitempty"`
 	twins []string
 }
-
-var vowelsList = letterStringList{}
-
-// var vowelsList = letterStringList{
-// 	list: []letterStrong{
-// 		{
-// 			letter: "a",
-// 			weight: 3,
-// 		},
-// 		{
-// 			letter: "i",
-// 			weight: 3,
-// 		},
-// 		{
-// 			letter: "o",
-// 			weight: 3,
-// 		},
-// 		{
-// 			letter: "u",
-// 			weight: 3,
-// 		},
-// 		{
-// 			letter: "e",
-// 			weight: 3,
-// 		},
-// 		{
-// 			letter: "t",
-// 			weight: 2,
-// 		},
-// 		{
-// 			letter: "n",
-// 			weight: 2,
-// 		},
-// 		{
-// 			letter: "l",
-// 			weight: 2,
-// 		},
-// 		{
-// 			letter: "c",
-// 			weight: 2,
-// 		},
-// 		{
-// 			letter: "d",
-// 			weight: 2,
-// 		},
-// 		{
-// 			letter: "s",
-// 			weight: 2,
-// 		},
-// 	},
-// }
 
 func removeDuplicateValues(intSlice []string) []string {
 	keys := make(map[string]bool)
@@ -195,14 +148,14 @@ func UpdateDefaultWiefghts(list letterStringList, w *battleword.PlayerGameState)
 
 	for _, game := range games {
 		wordSingles := strings.Split(game.Guess, "")
-		// fmt.Println("last game", game.Result, game.Guess)
+		fmt.Println("last game", game.Result, game.Guess)
 
 		twins, twinLocation := hasDuplicateValues(wordSingles)
 		for i, letter := range wordSingles {
 			lastStrong := GetSingleWiefghts(newlist, letter)
 
-			fmt.Println("twins:", twins, ":", letter, twinLocation, i)
-			fmt.Println("old letter update", lastStrong)
+			// fmt.Println("twins:", twins, ":", letter, twinLocation, i)
+			// fmt.Println("old letter update", lastStrong)
 
 			if game.Result[i] == 0 {
 
@@ -229,7 +182,7 @@ func UpdateDefaultWiefghts(list letterStringList, w *battleword.PlayerGameState)
 				for j, loc := range lastStrong.Locaion {
 					if loc != 0 {
 						lastStrong.Locaion[j] = 1
-						lastStrong.Weight[j] = 20
+						lastStrong.Weight[j] = 40
 					}
 				}
 
@@ -246,7 +199,7 @@ func UpdateDefaultWiefghts(list letterStringList, w *battleword.PlayerGameState)
 					lastStrong.Weight = []int{0, 0, 0, 0, 0}
 				}
 
-				lastStrong.Weight[i] = 40
+				lastStrong.Weight[i] = 60
 				lastStrong.Locaion[i] = 2
 			}
 
@@ -306,10 +259,10 @@ func GetWordWeight(word string, wig letterStringList) WordStrong {
 		letterWight := GetLetterWeight(single, wig)
 
 		if letterWight.Locaion[i] == 2 {
-			totalW += letterWight.Weight[i] + 20
+			totalW += letterWight.Weight[i] + 40
 
 		} else if letterWight.Locaion[i] == 1 {
-			totalW += letterWight.Weight[i] + 10
+			totalW += letterWight.Weight[i] + 30
 
 		} else {
 			if letterWight.Weight[i] != 0 {
@@ -328,7 +281,7 @@ func GetWordWeight(word string, wig letterStringList) WordStrong {
 func CreateGuess(w *battleword.PlayerGameState) WordStrong {
 
 	commonWords := battleword.CommonWords
-	// commonWords := battleword.AllWords
+	// commonWords := append(battleword.AllWords, battleword.CommonWords...)
 	weights := CreateAllDefaultWiefghts()
 	weights = UpdateDefaultWiefghts(weights, w)
 
