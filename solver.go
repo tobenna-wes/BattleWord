@@ -88,6 +88,7 @@ func GetDefaultLetterWeight(letter string) []float32 {
 func GetDefaultLetterWeightFromList() []map[string]float32 {
 
 	commonWords := battleword.CommonWords
+	// commonWords := battleword.AllWords
 
 	var keys []map[string]float32
 
@@ -135,19 +136,21 @@ func GetDefaultLetterWeightFromList() []map[string]float32 {
 
 func CreateAllDefaultWiefghts() letterStringList {
 
+	wights := GetDefaultLetterWeightFromList()
 	wordSingles := strings.Split(allLetters, "")
 	allStringList := letterStringList{}
 
 	for _, letter := range wordSingles {
 		allStringList.List = append(allStringList.List,
 			letterStrong{
-				Letter:  letter,
-				Weight:  GetDefaultLetterWeight(letter),
+				Letter: letter,
+				Weight: []float32{wights[0][letter], wights[1][letter], wights[2][letter], wights[3][letter], wights[4][letter]},
+				// Weight:  GetDefaultLetterWeight(letter),
 				Locaion: []float32{1, 1, 1, 1, 1},
 			})
 	}
 
-	// fmt.Println(len(allStringList.List))
+	fmt.Println(len(allStringList.List))
 
 	return allStringList
 }
@@ -258,9 +261,9 @@ func UpdateDefaultWiefghts(list letterStringList, w *battleword.PlayerGameState)
 	}
 
 	fmt.Println("--------------------------")
-	for _, result := range newlist.List {
-		fmt.Println(result)
-	}
+	// for _, result := range newlist.List {
+	// 	fmt.Println(result)
+	// }
 	fmt.Println("--------------------------")
 
 	return newlist
@@ -332,8 +335,8 @@ func CreateGuess(w *battleword.PlayerGameState) WordStrong {
 	// commonWords := append(battleword.AllWords, battleword.CommonWords...)
 	weights := CreateAllDefaultWiefghts()
 	weights = UpdateDefaultWiefghts(weights, w)
-
-	// fmt.Println()
+	//
+	// fmt.Println(weights)
 
 	// maxWordWight := 0
 	maxWord := WordStrong{

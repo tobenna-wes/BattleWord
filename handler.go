@@ -118,8 +118,25 @@ func HandleResult(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Match %s concluded, we got %d words right\n\n", finalState.Results.UUID, gamesWon)
 
-	for _, result := range finalState.Results.Games {
-		fmt.Println("finalword", result.Answer)
+	// for _, result := range finalState.Results.Games {
+	// 	fmt.Println("finalword", result.Answer)
+	// }
+
+	for x, result := range finalState.Results.Players {
+
+		total := float32(0)
+		count := float32(0)
+
+		for i, played := range result.GamesPlayed {
+
+			len := len(played.GuessResults)
+			total += float32(len)
+			count = float32(i + 1)
+			// fmt.Println("Game", i, "Attempts", len, "word", played.GuessResults[len-1].Guess)
+		}
+
+		fmt.Println("Player", x, "NAME", result.Definition.Name, "Average", total/count)
+
 	}
 
 	// log.Printf("Match %s concluded, we got %d words right. Body: %s", finalState.Results.UUID, gamesWon, finalStateJSON)
