@@ -16,14 +16,14 @@ var commonLetters = []string{"t", "n", "l", "c", "d", "s"}
 var allLetters = "abcdefghijklmnopqrstuvqrstuvwxyz"
 
 type letterStrong struct {
-	Letter  string `json:"letter,omitempty"`
-	Weight  []int  `json:"weight,omitempty"`
-	Locaion []int  `json:"locaion,omitempty"`
+	Letter  string    `json:"letter,omitempty"`
+	Weight  []float32 `json:"weight,omitempty"`
+	Locaion []float32 `json:"locaion,omitempty"`
 }
 
 type WordStrong struct {
-	word   string `json:"word,omitempty"`
-	Weight int    `json:"weight,omitempty"`
+	word   string  `json:"word,omitempty"`
+	Weight float32 `json:"weight,omitempty"`
 }
 
 type letterStringList struct {
@@ -63,25 +63,62 @@ func hasDuplicateValues(intSlice []string) (string, int) {
 	return "", 0
 }
 
-func GetDefaultLetterWeight(letter string) []int {
+func GetDefaultLetterWeight(letter string) []float32 {
 
 	if len(letter) != 1 {
-		return []int{1, 1, 1, 1, 1}
+		return []float32{1, 1, 1, 1, 1}
 	}
 
 	for _, vowel := range vowels {
 		if vowel == letter {
-			return []int{3, 3, 3, 3, 3}
+			return []float32{3, 3, 3, 3, 3}
 		}
 	}
 
 	for _, common := range commonLetters {
 		if common == letter {
-			return []int{2, 2, 2, 2, 2}
+			return []float32{2, 2, 2, 2, 2}
 		}
 	}
 
-	return []int{1, 1, 1, 1, 1}
+	return []float32{1, 1, 1, 1, 1}
+
+}
+
+func GetDefaultLetterWeightFromList() []letterStrong {
+
+	commonWords := battleword.CommonWords
+
+	keys := make(map[string]float32)
+
+	max := []float32{0, 0, 0, 0, 0}
+
+	location := 1
+	for _, entry := range commonWords {
+
+		wordSingles := strings.Split(entry, "")
+		_, value := keys[wordSingles[location]]
+
+		if !value {
+			keys[wordSingles[location]] = 0
+
+		} else {
+			keys[wordSingles[location]] += 1
+		}
+
+		val, _ := keys[wordSingles[location]]
+
+		if val > max[location] {
+			max[location] = val
+		}
+	}
+
+	for key := range keys {
+		keys[key] = keys[key] / max[location]
+	}
+
+	fmt.Println("keys", keys, len(commonWords), max[location])
+	return []letterStrong{}
 
 }
 
@@ -95,7 +132,7 @@ func CreateAllDefaultWiefghts() letterStringList {
 			letterStrong{
 				Letter:  letter,
 				Weight:  GetDefaultLetterWeight(letter),
-				Locaion: []int{1, 1, 1, 1, 1},
+				Locaion: []float32{1, 1, 1, 1, 1},
 			})
 	}
 
@@ -132,7 +169,7 @@ func GetSingleWiefghts(lists letterStringList, letter string) letterStrong {
 
 	return letterStrong{
 		Letter: letter,
-		Weight: []int{1, 1, 1, 1, 1},
+		Weight: []float32{1, 1, 1, 1, 1},
 	}
 }
 
@@ -196,7 +233,7 @@ func UpdateDefaultWiefghts(list letterStringList, w *battleword.PlayerGameState)
 				if twins == letter && twinLocation == i {
 
 				} else {
-					lastStrong.Weight = []int{0, 0, 0, 0, 0}
+					lastStrong.Weight = []float32{0, 0, 0, 0, 0}
 				}
 
 				lastStrong.Weight[i] = 60
@@ -244,7 +281,7 @@ func GetLetterWeight(letter string, wig letterStringList) letterStrong {
 
 	return letterStrong{
 		Letter: letter,
-		Weight: []int{1, 1, 1, 1, 1},
+		Weight: []float32{1, 1, 1, 1, 1},
 	}
 }
 
@@ -253,7 +290,7 @@ func GetWordWeight(word string, wig letterStringList) WordStrong {
 
 	// wordSingles = removeDuplicateValues(wordSingles)
 
-	totalW := 0
+	totalW := float32(0)
 	for i, single := range wordSingles {
 		// fmt.Println(single, GetLetterWeight(single))
 		letterWight := GetLetterWeight(single, wig)

@@ -31,7 +31,7 @@ func TestCreateGuess(t *testing.T) {
 }
 
 func TestCreateGame(t *testing.T) {
-	ServerStart()
+	GetDefaultLetterWeightFromList()
 }
 
 func TestCreateEgine(t *testing.T) {
