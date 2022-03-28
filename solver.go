@@ -85,40 +85,51 @@ func GetDefaultLetterWeight(letter string) []float32 {
 
 }
 
-func GetDefaultLetterWeightFromList() []letterStrong {
+func GetDefaultLetterWeightFromList() []map[string]float32 {
 
 	commonWords := battleword.CommonWords
 
-	keys := make(map[string]float32)
+	var keys []map[string]float32
+
+	// keys = []make(map[string]float32)
+	keys = append(keys, make(map[string]float32))
+	keys = append(keys, make(map[string]float32))
+	keys = append(keys, make(map[string]float32))
+	keys = append(keys, make(map[string]float32))
+	keys = append(keys, make(map[string]float32))
 
 	max := []float32{0, 0, 0, 0, 0}
 
-	location := 1
-	for _, entry := range commonWords {
+	// location := 3
 
-		wordSingles := strings.Split(entry, "")
-		_, value := keys[wordSingles[location]]
+	for location := range keys {
+		for _, entry := range commonWords {
 
-		if !value {
-			keys[wordSingles[location]] = 0
+			wordSingles := strings.Split(entry, "")
+			_, value := keys[location][wordSingles[location]]
 
-		} else {
-			keys[wordSingles[location]] += 1
+			if !value {
+				keys[location][wordSingles[location]] = 0
+
+			} else {
+				keys[location][wordSingles[location]] += 1
+			}
+
+			val, _ := keys[location][wordSingles[location]]
+
+			if val > max[location] {
+				max[location] = val
+			}
 		}
 
-		val, _ := keys[wordSingles[location]]
-
-		if val > max[location] {
-			max[location] = val
+		for key := range keys[location] {
+			keys[location][key] = keys[location][key] / max[location]
 		}
+
 	}
 
-	for key := range keys {
-		keys[key] = keys[key] / max[location]
-	}
-
-	fmt.Println("keys", keys, len(commonWords), max[location])
-	return []letterStrong{}
+	fmt.Println("keys", keys, len(commonWords), max)
+	return keys
 
 }
 
